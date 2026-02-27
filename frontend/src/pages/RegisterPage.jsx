@@ -24,12 +24,12 @@ const RegisterPage = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   
-  const program = location.state?.program || 'AiCE';
-  const cohort = location.state?.cohort || 'Cohort 17';
+  const program = location.state?.program || 'Graphic Design';
+  const cohort = location.state?.cohort || 'Cohort 11';
   const connectionType = location.state?.connectionType || 'find';
 
-  // --- SPECIAL CONDITION: AiCE Cohort 17 ---
-  const isAiCEC17 = program === 'AiCE' && cohort === 'Cohort 17';
+  // --- SPECIAL CONDITION: Graphic Design Cohort 11 ---
+  const isAiCEC17 = program === 'Graphic Design' && cohort === 'Cohort 11';
 
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', country: '', language: '',
@@ -39,9 +39,9 @@ const RegisterPage = () => {
     kind_of_support: '', disclaimer_agree: false
   });
 
-  // Force specific values for AiCE Cohort 17
+  // Force specific values for Graphic Design
   useEffect(() => {
-    if (isAiCEC17) {
+    if (isGraphicDesignC11) {
         setFormData(prev => ({
             ...prev,
             topic_module: "All Modules",
@@ -49,7 +49,7 @@ const RegisterPage = () => {
             preferred_study_setup: "2"
         }));
     }
-  }, [isAiCEC17]);
+  }, [isGraphicDesignC11]);
 
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -57,9 +57,9 @@ const RegisterPage = () => {
   };
 
   const getModules = () => {
-    if (isAiCEC17) return ["All Modules"];
-    if (program === 'VA') return ["Week 1: Recap Quiz/Milestone", "Week 2: Recap Quiz/Milestone", "Week 3: Recap Quiz/Milestone", "Week 4: Recap Quiz/Milestone", "Week 5: Recap Quiz/Milestone", "Week 6: Recap Quiz/Milestone", "Week 7: Recap Quiz/Milestone", "Week 8: Recap Quiz/Milestone"];
-    if (program === 'AiCE') return ["Module 1: Stepping into the world of AI", "Module 2: Getting smart about AI", "Module 3: Using AI in the right way", "Module 4: Becoming more creative at work", "Module 5: Becoming a superhero at work", "Module 6: Empower your future"];
+    if (isGraphicDesignC11) return ["All Modules"];
+    if (program === 'CC') return ["Week 1: Recap Quiz/Milestone", "Week 2: Recap Quiz/Milestone", "Week 3: Recap Quiz/Milestone", "Week 4: Recap Quiz/Milestone", "Week 5: Recap Quiz/Milestone", "Week 6: Recap Quiz/Milestone", "Week 7: Recap Quiz/Milestone", "Week 8: Recap Quiz/Milestone"];
+    if (program === 'GD') return ["Module 1: Stepping into the world of AI", "Module 2: Getting smart about AI", "Module 3: Using AI in the right way", "Module 4: Becoming more creative at work", "Module 5: Becoming a superhero at work", "Module 6: Empower your future"];
     return Array.from({length: 12}, (_, i) => `Week ${i+1} Test/Milestone`);
   };
 
@@ -224,4 +224,5 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
