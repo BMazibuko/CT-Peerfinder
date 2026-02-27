@@ -99,9 +99,9 @@ const LandingPage = () => {
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigate('/status/check')} style={styles.secondaryBtn}>Check Status</motion.button>
             </div>
           </motion.div>
-          {/* <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.2 }} style={styles.videoWrapper}>
+          {<motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.2 }} style={styles.videoWrapper}>
             <iframe src="https://www.youtube.com/embed/78uUL2WFo0k" title="PeerFinder Walkthrough" style={styles.iframe} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-          </motion.div> */}
+          </motion.div>}
         </div>
       </div>
 
@@ -255,6 +255,7 @@ const styles = {
 };
 
 export default LandingPage;
+
 
 
 
