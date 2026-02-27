@@ -43,9 +43,9 @@ s3 = boto3.client(
 )
 
 # === FILE NAMES ===
-CSV_OBJECT_KEY = 'peer_matching_data_v2.csv' 
-FEEDBACK_OBJECT_KEY = 'peer_finder_feedback.csv'
-SESSION_FEEDBACK_OBJECT_KEY = 'peer_session_feedback.csv'
+CSV_OBJECT_KEY = 'ct-peerfinder.csv' 
+FEEDBACK_OBJECT_KEY = 'ct-peerfinder-feedback.csv'
+SESSION_FEEDBACK_OBJECT_KEY = 'ct_peer_session_feedback.csv'
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
 
 # === PROGRAM CREDENTIALS ===
@@ -61,17 +61,13 @@ def load_google_token(env_var_name):
         return None
 
 PROGRAM_CREDENTIALS = {
-    'VA': {
-        'email': os.environ.get('VA_EMAIL', 'vaprogram@alxafrica.com'),
-        'token': load_google_token('VA_GOOGLE_TOKEN')
+    'CC': {
+        'email': os.environ.get('CC_EMAIL', 'contentcreation@alxafrica.com'),
+        'token': load_google_token('CC_GOOGLE_TOKEN')
     },
-    'AiCE': {
-        'email': os.environ.get('AICE_EMAIL', 'aice@alxafrica.com'),
-        'token': load_google_token('AICE_GOOGLE_TOKEN')
-    },
-    'PF': {
-        'email': os.environ.get('PF_EMAIL', 'alxfoundations@alxafrica.com'),
-        'token': load_google_token('PF_GOOGLE_TOKEN')
+    'GD': {
+        'email': os.environ.get('GD_EMAIL', 'graphicdesign@alxafrica.com'),
+        'token': load_google_token('GD_GOOGLE_TOKEN')
     }
 }
 
@@ -86,7 +82,7 @@ def validate_registration(data):
         errors.append("Invalid email address format")
     if not re.match(r'^\+?[1-9]\d{1,14}$', data.get('phone', '').replace(' ', '')):
         errors.append("Invalid phone number. Use format +1234567890")
-    if data.get('program') not in ['VA', 'AiCE', 'PF']:
+    if data.get('program') not in ['CC', 'GD']:
         errors.append("Invalid program selected")
     if data.get('connection_type') not in ['find', 'offer', 'need']:
         errors.append("Invalid connection type")
@@ -112,7 +108,7 @@ def api_wrapper(f):
 # === GMAIL FUNCTIONS ===
 def get_gmail_service(program_name):
     if not program_name or program_name not in PROGRAM_CREDENTIALS:
-        program_name = 'PF' 
+        program_name = 'GD' 
     config = PROGRAM_CREDENTIALS[program_name]
     try:
         creds = Credentials.from_authorized_user_info(config['token'], SCOPES)
@@ -655,3 +651,4 @@ def dl_session_feedback():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
+
