@@ -58,9 +58,38 @@ const RegisterPage = () => {
 
   const getModules = () => {
     if (isGraphicDesignC11) return ["All Modules"];
-    if (program === 'CC') return ["Week 1: Recap Quiz/Milestone", "Week 2: Recap Quiz/Milestone", "Week 3: Recap Quiz/Milestone", "Week 4: Recap Quiz/Milestone", "Week 5: Recap Quiz/Milestone", "Week 6: Recap Quiz/Milestone", "Week 7: Recap Quiz/Milestone", "Week 8: Recap Quiz/Milestone"];
-    if (program === 'GD') return ["Module 1: Stepping into the world of AI", "Module 2: Getting smart about AI", "Module 3: Using AI in the right way", "Module 4: Becoming more creative at work", "Module 5: Becoming a superhero at work", "Module 6: Empower your future"];
-    return Array.from({length: 12}, (_, i) => `Week ${i+1} Test/Milestone`);
+    if (program === 'CC')return ["Week 1 Challenge",
+                                  "Week 2 Challenge",
+                                  "Week 3 Challenge",
+                                  "Week 4 Challenge",
+                                  "Week 5 Challenge",
+                                  "Week 6 Challenge",
+                                  "Week 7 Challenge",
+                                  "Week 8 Challenge",
+                                  "Week 9 Challenge",
+                                  "Week 10 Challenge",
+                                  "Week 11 Challenge",
+                                  "Week 12 Challenge",
+                                  "Week 13 Challenge",
+                                  'Week 14 Challenge",
+                                  "Final Project"];
+    if (program === 'GD') return ["Module 1 - Week 1 of Project 1",
+                                  "Module 2  - Week 2 of Project 1", 
+                                  "Module 3 - Week 3 of Project 1", 
+                                  "Module 4 - Week 4 of Project 1",
+                                  "Module 5 - Week 1 of Project 2", 
+                                  "Module 6 - Week 2 of Project 2",
+                                  "Module 7 - Week 3 of Project 2",
+                                  "Module 8 - Week 1 of Project 3",
+                                  "Module 9 - Week 2 of Project 3",
+                                  "Module 10 - Week 3 of Project 3",
+                                  "Module 11 - Week 1 of Project 4",
+                                  "Module 12 - Week 2 of Project 4",
+                                  "Module 13 - Week 3 of Project 4",
+                                  "Module 14 - Week 4 of Project 4",
+                                  "Module 15 - Week 1 of Final Project",
+                                  "Module 16 - Week 2 of final Project"];
+    return Array.from({length: 12}, (_, i) => `Week ${i+1}Challenge/Project`);
   };
 
   const handleSubmit = async (e) => {
@@ -146,7 +175,7 @@ const RegisterPage = () => {
                     <option value="Deep dive">Deep dive</option>
                     <option value="Co-work sessions">Co-work sessions</option>
                     <option value="General program navigation">General program navigation</option>
-                    <option value="Flexible">Flexible</option>
+                    <option value="Coffee Chat">Coffee chat</option>
                 </>
             )}
            </select>
@@ -224,5 +253,6 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
 
