@@ -37,6 +37,81 @@ const HeroSlideshow = () => {
   );
 };
 
+// --- ANIMATED LEADERBOARD COMPONENT ---
+const Leaderboard = () => {
+  const [leaders, setLeaders] = useState([]);
+
+  useEffect(() => {
+    axios.get(`${API_URL}/api/leaderboard`)
+      .then(res => {
+        if (res.data.success) setLeaders(res.data.leaderboard);
+      })
+      .catch(err => console.error("Error fetching leaderboard", err));
+  }, []);
+
+  if (leaders.length === 0) return null; // Don't show if no data yet
+
+  const first = leaders[0];
+  const second = leaders[1];
+  const third = leaders[2];
+  const runnersUp = leaders.slice(3, 10);
+
+  return (
+    <div style={styles.leaderboardSection}>
+      <h2 style={{color: colors.primary.berkeleyBlue, fontSize: '2.5rem', marginBottom: '10px'}}>🌟 Community Support Stars</h2>
+      <p style={{color: '#666', marginBottom: '10px', fontSize: '1.1rem'}}>Spotlighting the top learners helping their peers succeed!</p>
+      
+      {/* THE PODIUM */}
+      <div style={styles.podiumContainer}>
+        {/* 2nd Place */}
+        {second && (
+          <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} style={styles.podiumBlockWrap}>
+            <div style={styles.avatar}>🥈 🧑‍🎓</div>
+            <div style={{...styles.podiumName, color: '#C0C0C0'}}>{second.name}</div>
+            <div style={styles.podiumScore}>{second.score} pts</div>
+            <div style={{...styles.podiumPillar, height: '90px', background: 'linear-gradient(to top, #e0e0e0, #f8f9fa)'}}>2nd</div>
+          </motion.div>
+        )}
+        
+        {/* 1st Place */}
+        {first && (
+          <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{...styles.podiumBlockWrap, zIndex: 10}}>
+            <div style={{...styles.avatar, fontSize: '3.5rem'}}>🥇 🦸‍♂️</div>
+            <div style={{...styles.podiumName, color: '#FFD700'}}>{first.name}</div>
+            <div style={styles.podiumScore}>{first.score} pts</div>
+            <div style={{...styles.podiumPillar, height: '120px', background: 'linear-gradient(to top, #ffeeba, #fff9e6)', border: '2px solid #FFD700'}}>1st</div>
+          </motion.div>
+        )}
+
+        {/* 3rd Place */}
+        {third && (
+          <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} style={styles.podiumBlockWrap}>
+            <div style={styles.avatar}>🥉 👩‍💻</div>
+            <div style={{...styles.podiumName, color: '#CD7F32'}}>{third.name}</div>
+            <div style={styles.podiumScore}>{third.score} pts</div>
+            <div style={{...styles.podiumPillar, height: '70px', background: 'linear-gradient(to top, #f4e3d7, #fdf8f5)'}}>3rd</div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* RUNNERS UP LIST */}
+      {runnersUp.length > 0 && (
+        <div style={styles.runnersUpList}>
+          {runnersUp.map((user, idx) => (
+            <motion.div key={idx} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }} style={styles.runnerUpCard}>
+              <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
+                <span style={{fontWeight:'bold', color:'#999', width:'25px'}}>#{idx + 4}</span>
+                <span style={{fontWeight:'bold', color: colors.primary.berkeleyBlue}}>{user.name}</span>
+              </div>
+              <span style={{color: colors.primary.iris, fontWeight:'bold'}}>{user.score} pts</span>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
@@ -71,10 +146,8 @@ const LandingPage = () => {
     navigate('/register', { state: { program: selectedProgram.id, cohort: selectedCohort, connectionType: type } });
   };
 
-  // Helper to check restricted cohorts 
+  // Turn off restrictions so they can access Volunteer/Need Help options
   const isRestrictedCohort = () => {
-    if (selectedProgram?.id === 'GD' && selectedCohort === 'Cohort 11') return true;
-    if (selectedProgram?.id === 'CC' && selectedCohort === 'Cohort 11') return true;
     return false;
   };
 
@@ -146,7 +219,6 @@ const LandingPage = () => {
                   <div style={styles.modalGrid}>
                     <OptionCard title="Find a Study Buddy 🤝" desc="Accountability Partner / Group" color={colors.primary.iris} onClick={() => handleOptionSelect('find')} />
                     
-                    {/* HIDE OTHER OPTIONS FOR RESTRICTED COHORTS (VA C13, AiCE C17) */}
                     {!isRestrictedCohort() && (
                       <>
                         <OptionCard title="Offer Support 💁‍♀️" desc="Volunteer Mode ⭐⭐⭐ " color={colors.primary.springGreen} textColor={colors.primary.berkeleyBlue} onClick={() => handleOptionSelect('offer')} />
@@ -161,6 +233,8 @@ const LandingPage = () => {
         )}
       </AnimatePresence>
 
+      <Leaderboard />
+
       <div style={styles.infoSection}>
         <InfoBlock title="Collaborate, Grow, and Achieve Together" text="Learning is more rewarding when shared. PeerFinder helps you discover learners who match your rhythm and goals, so you can support each other, exchange ideas, and stay motivated throughout your journey." />
         <InfoBlock title="Tailored Connections" text="Whether you prefer focused one-on-one partnerships or dynamic groups of three or five, PeerFinder matches you with peers who have similar progress and commitment levels." />
@@ -174,7 +248,6 @@ const LandingPage = () => {
       {/* --- FLOATING BUTTONS --- */}
       <button onClick={() => setShowFeedback(true)} style={styles.feedbackBtn}>Rate the Peer Finder ⭐</button>
       
-      {/* NEW: Peer Session Feedback Button */}
       <motion.button 
         whileHover={{ scale: 1.05 }} 
         whileTap={{ scale: 0.95 }} 
@@ -230,6 +303,8 @@ const styles = {
   image: { width: '100%', height: '100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' },
   overlay: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,43,86,0.6)' },
   slideContentWrapper: { position: 'absolute', bottom: '15%', width: '100%', textAlign: 'center', color: 'white', zIndex: 2 },
+  slideTitle: { fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem' },
+  slideSubtext: { fontSize: '1.2rem' },
   heroForeground: { position: 'relative', zIndex: 10, display: 'flex', flexWrap:'wrap', justifyContent:'center', alignItems:'center', gap:'3rem', padding:'2rem', width:'100%', maxWidth:'1200px' },
   heroTextContainer: { flex: '1', minWidth: '300px', maxWidth: '550px', textAlign: 'left', color: 'white' },
   heroTitle: { fontSize: '3.5rem', fontWeight: '800', lineHeight: '1.1', marginBottom: '1rem' },
@@ -251,16 +326,18 @@ const styles = {
   infoText: { fontSize: '1.1rem', lineHeight: '1.6', maxWidth: '700px', margin: '0 auto' },
   footer: { background: colors.primary.berkeleyBlue, color: 'rgba(255,255,255,0.6)', textAlign: 'center', padding: '2rem', fontSize: '0.9rem', borderTop: '1px solid rgba(255,255,255,0.1)' },
   feedbackBtn: { position: 'fixed', bottom: '20px', left: '20px', padding: '10px 20px', borderRadius: '30px', border: 'none', background: colors.primary.iris, color: 'white', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: '5px', zIndex: 100 },
-  peerFeedbackBtn: { position: 'fixed', bottom: '20px', right: '20px', padding: '12px 24px', borderRadius: '30px', border: 'none', background: colors.secondary.tomato, color: 'white', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 100 }
+  peerFeedbackBtn: { position: 'fixed', bottom: '20px', right: '20px', padding: '12px 24px', borderRadius: '30px', border: 'none', background: colors.secondary.tomato, color: 'white', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 100 },
+
+  // --- LEADERBOARD STYLES ---
+  leaderboardSection: { padding: '4rem 2rem', background: 'white', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+  podiumContainer: { display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '15px', height: '300px', marginTop: '40px', marginBottom: '30px', maxWidth: '600px', width: '100%' },
+  podiumBlockWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative' },
+  avatar: { fontSize: '3rem', marginBottom: '10px' },
+  podiumName: { fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '5px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' },
+  podiumScore: { fontSize: '0.9rem', color: '#666', marginBottom: '10px', fontWeight: 'bold' },
+  podiumPillar: { width: '100%', borderRadius: '10px 10px 0 0', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#555', boxShadow: '0 -4px 10px rgba(0,0,0,0.1)' },
+  runnersUpList: { display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '500px' },
+  runnerUpCard: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa', padding: '15px 20px', borderRadius: '10px', border: '1px solid #eee', boxShadow: '0 2px 5px rgba(0,0,0,0.02)' }
 };
 
 export default LandingPage;
-
-
-
-
-
-
-
-
-
