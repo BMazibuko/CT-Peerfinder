@@ -29,7 +29,7 @@ const RegisterPage = () => {
   const connectionType = location.state?.connectionType || 'find';
 
   // --- SPECIAL CONDITION: Graphic Design Cohort 11 ---
-  const isAiCEC17 = program === 'Graphic Design' && cohort === 'Cohort 11';
+  const isGraphicDesignC11 = program === 'Graphic Design' && cohort === 'Cohort 11';
 
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', country: '', language: '',
@@ -73,22 +73,6 @@ const RegisterPage = () => {
                                   "Week 13 Challenge",
                                   'Week 14 Challenge",
                                   "Final Project"];
-    if (program === 'GD') return ["Module 1 - Week 1 of Project 1",
-                                  "Module 2  - Week 2 of Project 1", 
-                                  "Module 3 - Week 3 of Project 1", 
-                                  "Module 4 - Week 4 of Project 1",
-                                  "Module 5 - Week 1 of Project 2", 
-                                  "Module 6 - Week 2 of Project 2",
-                                  "Module 7 - Week 3 of Project 2",
-                                  "Module 8 - Week 1 of Project 3",
-                                  "Module 9 - Week 2 of Project 3",
-                                  "Module 10 - Week 3 of Project 3",
-                                  "Module 11 - Week 1 of Project 4",
-                                  "Module 12 - Week 2 of Project 4",
-                                  "Module 13 - Week 3 of Project 4",
-                                  "Module 14 - Week 4 of Project 4",
-                                  "Module 15 - Week 1 of Final Project",
-                                  "Module 16 - Week 2 of final Project"];
     return Array.from({length: 12}, (_, i) => `Week ${i+1}Challenge/Project`);
   };
 
@@ -155,7 +139,7 @@ const RegisterPage = () => {
              <div style={styles.half}>
                 <label style={styles.label}>Current Week/Module</label>
                 <select style={styles.select} name="topic_module" onChange={handleChange} required value={formData.topic_module}>
-                    {!isAiCEC17 && <option value="">--Select--</option>}
+                    {!isGraphicDesignC11 && <option value="">--Select--</option>}
                     {getModules().map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
              </div>
@@ -167,7 +151,7 @@ const RegisterPage = () => {
 
            <label style={styles.label}>Learning Preference</label>
            <select style={styles.select} name="learning_preferences" onChange={handleChange} required value={formData.learning_preferences}>
-            {isAiCEC17 ? (
+            {isGraphicDesignC11 ? (
                 <option value="Dedicated Accountability Partner">Dedicated Accountability Partner</option>
             ) : (
                 <>
@@ -253,6 +237,7 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
 
 
