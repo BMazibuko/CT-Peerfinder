@@ -71,7 +71,7 @@ const RegisterPage = () => {
                                   "Week 11 Challenge",
                                   "Week 12 Challenge",
                                   "Week 13 Challenge",
-                                  'Week 14 Challenge",
+                                  "Week 14 Challenge",
                                   "Final Project"];
     return Array.from({length: 12}, (_, i) => `Week ${i+1}Challenge/Project`);
   };
@@ -237,6 +237,7 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
 
 
