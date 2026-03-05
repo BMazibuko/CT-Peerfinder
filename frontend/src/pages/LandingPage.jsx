@@ -71,10 +71,10 @@ const LandingPage = () => {
     navigate('/register', { state: { program: selectedProgram.id, cohort: selectedCohort, connectionType: type } });
   };
 
-  // Helper to check restricted cohorts (VA C13 & AiCE C17)
+  // Helper to check restricted cohorts 
   const isRestrictedCohort = () => {
-    if (selectedProgram?.id === 'VA' && selectedCohort === 'Cohort 14') return true;
-    if (selectedProgram?.id === 'AiCE' && selectedCohort === 'Cohort 18') return true;
+    if (selectedProgram?.id === 'GD' && selectedCohort === 'Cohort 11') return true;
+    if (selectedProgram?.id === 'CC' && selectedCohort === 'Cohort 11') return true;
     return false;
   };
 
@@ -255,6 +255,7 @@ const styles = {
 };
 
 export default LandingPage;
+
 
 
 
