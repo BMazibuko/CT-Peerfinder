@@ -14,17 +14,12 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [programFilter, setProgramFilter] = useState("All");
 
-  // Selection State
   const [selectedIds, setSelectedIds] = useState([]);
-
-  // NEW: Pagination State for Groups
   const [currentGroupPage, setCurrentGroupPage] = useState(1);
   const groupsPerPage = 21; 
 
-  // Modal State
   const [modal, setModal] = useState({ isOpen: false, type: null, title: '', message: '', isSuccess: false, action: null });
 
-  // --- LOGIN ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -46,7 +41,6 @@ const AdminPage = () => {
     } catch (err) { console.error(err); }
   };
 
-  // --- ACTIONS ---
   const initiateRandomPair = (userId, userName) => {
     setModal({
       isOpen: true, type: 'confirm', title: 'Confirm Random Pairing',
@@ -93,25 +87,24 @@ const AdminPage = () => {
   const closeModal = () => setModal({ ...modal, isOpen: false });
   const toggleSelection = (id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
-  // --- DOWNLOADS ---
   const downloadCSV = async () => {
     try {
       const res = await axios.post(`${API_URL}/api/admin/download`, { password }, { responseType: 'blob' });
-      triggerDownload(res.data, 'peer_data.csv');
+      triggerDownload(res.data, 'gd_cc_peer_data.csv');
     } catch (err) { alert("Download failed"); }
   };
 
   const downloadFeedback = async () => {
     try {
       const res = await axios.post(`${API_URL}/api/admin/download-feedback`, { password }, { responseType: 'blob' });
-      triggerDownload(res.data, 'feedback.csv');
+      triggerDownload(res.data, 'gd_cc_feedback.csv');
     } catch (err) { alert("Feedback download failed"); }
   };
 
   const downloadSessionFeedback = async () => {
     try {
       const res = await axios.post(`${API_URL}/api/admin/download-session-feedback`, { password }, { responseType: 'blob' });
-      triggerDownload(res.data, 'peer_session_feedback.csv');
+      triggerDownload(res.data, 'gd_cc_session_feedback.csv');
     } catch (err) { alert("Session Feedback download failed"); }
   };
 
@@ -122,7 +115,6 @@ const AdminPage = () => {
     document.body.appendChild(link); link.click();
   };
 
-  // --- DATA PROCESSING ---
   const getDaysSince = (dateStr) => {
     if (!dateStr) return 0;
     return Math.floor((new Date() - new Date(dateStr)) / (1000 * 60 * 60 * 24));
@@ -130,7 +122,6 @@ const AdminPage = () => {
 
   if (!isAuthenticated) return <LoginScreen handleLogin={handleLogin} password={password} setPassword={setPassword} loading={loading} />;
 
-  // Filter Data
   const programLearners = data.learners.filter(l => programFilter === "All" || l.program === programFilter);
   
   const unpairedList = programLearners
@@ -146,15 +137,10 @@ const AdminPage = () => {
     return acc;
   }, {});
 
-  // NEW: Pagination Logic for Matches Tab
   const matchedGroupsArray = Object.entries(matchedGroups);
   const totalGroupPages = Math.ceil(matchedGroupsArray.length / groupsPerPage);
-  const paginatedGroups = matchedGroupsArray.slice(
-    (currentGroupPage - 1) * groupsPerPage, 
-    currentGroupPage * groupsPerPage
-  );
+  const paginatedGroups = matchedGroupsArray.slice((currentGroupPage - 1) * groupsPerPage, currentGroupPage * groupsPerPage);
 
-  // Chart Data
   const cohorts = {}; const countries = {}; const daysUnpaired = {};
   programLearners.forEach(l => {
     cohorts[l.cohort] = (cohorts[l.cohort] || 0) + 1;
@@ -166,7 +152,6 @@ const AdminPage = () => {
     }
   });
 
-  // Calculate Match Rate & Pending for current filter
   const totalInView = programLearners.length;
   const matchedInView = programLearners.filter(l => l.matched).length;
   const pendingInView = totalInView - matchedInView;
@@ -177,12 +162,10 @@ const AdminPage = () => {
       <div style={styles.topBar}>
         <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
             <h1 style={{color: 'white', margin: 0}}>Admin</h1>
-            <select 
-              value={programFilter} 
-              onChange={e => { setProgramFilter(e.target.value); setCurrentGroupPage(1); }} 
-              style={styles.programSelect}
-            >
-                <option value="All">All Programs</option><option value="VA">VA</option><option value="AiCE">AiCE</option><option value="PF">PF</option>
+            <select value={programFilter} onChange={e => { setProgramFilter(e.target.value); setCurrentGroupPage(1); }} style={styles.programSelect}>
+                <option value="All">All Programs</option>
+                <option value="GD">Graphic Design (GD)</option>
+                <option value="CC">Content Creation (CC)</option>
             </select>
         </div>
         <div style={{display:'flex', gap:'10px'}}>
@@ -267,23 +250,13 @@ const AdminPage = () => {
                 </div>
               ))}
             </div>
-
-            {/* Pagination Controls */}
             {totalGroupPages > 1 && (
               <div style={styles.paginationContainer}>
-                <button 
-                  style={currentGroupPage === 1 ? styles.pageBtnDisabled : styles.pageBtn} 
-                  disabled={currentGroupPage === 1} 
-                  onClick={() => setCurrentGroupPage(p => p - 1)}
-                >
+                <button style={currentGroupPage === 1 ? styles.pageBtnDisabled : styles.pageBtn} disabled={currentGroupPage === 1} onClick={() => setCurrentGroupPage(p => p - 1)}>
                   &larr; Previous
                 </button>
                 <span style={styles.pageText}>Page {currentGroupPage} of {totalGroupPages}</span>
-                <button 
-                  style={currentGroupPage === totalGroupPages ? styles.pageBtnDisabled : styles.pageBtn} 
-                  disabled={currentGroupPage === totalGroupPages} 
-                  onClick={() => setCurrentGroupPage(p => p + 1)}
-                >
+                <button style={currentGroupPage === totalGroupPages ? styles.pageBtnDisabled : styles.pageBtn} disabled={currentGroupPage === totalGroupPages} onClick={() => setCurrentGroupPage(p => p + 1)}>
                   Next &rarr;
                 </button>
               </div>
@@ -404,8 +377,6 @@ const styles = {
   btnConfirm: { padding: '8px 20px', background: colors.primary.iris, color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight:'bold' },
   btnCancel: { padding: '8px 20px', background: '#ccc', color: '#333', border: 'none', borderRadius: '5px', cursor: 'pointer' },
   badge: { background: '#fff3e0', color: '#e65100', padding: '3px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold' },
-  
-  // NEW PAGINATION STYLES
   paginationContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '30px', padding: '10px' },
   pageBtn: { padding: '8px 16px', background: 'white', border: `1px solid ${colors.primary.iris}`, color: colors.primary.iris, borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' },
   pageBtnDisabled: { padding: '8px 16px', background: '#f0f0f0', border: '1px solid #ddd', color: '#aaa', borderRadius: '5px', cursor: 'not-allowed' },
