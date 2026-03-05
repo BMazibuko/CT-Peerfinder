@@ -24,12 +24,12 @@ const RegisterPage = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   
-  const program = location.state?.program || 'Graphic Design';
+  const program = location.state?.program || 'GD';
   const cohort = location.state?.cohort || 'Cohort 11';
   const connectionType = location.state?.connectionType || 'find';
 
   // --- SPECIAL CONDITION: Graphic Design Cohort 11 ---
-  const isGraphicDesignC11 = program === 'Graphic Design' && cohort === 'Cohort 11';
+  const isGraphicDesignC11 = program === 'GD' && cohort === 'Cohort 11';
 
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', country: '', language: '',
@@ -237,6 +237,7 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
 
 
