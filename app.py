@@ -130,7 +130,6 @@ def send_email(to, subject, body, program_name, is_html=True):
         message['from'] = sender_email
         message['subject'] = subject
         
-        # Wrapped in a nice HTML structure
         html_body = f"""
         <html><body style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
@@ -152,7 +151,6 @@ def send_email(to, subject, body, program_name, is_html=True):
         logger.error(f"Email Error: {str(e)}")
         return False
 
-# NEW: Helper function to generate and send group match emails with WhatsApp links
 def notify_group_match(df, group_id):
     grp = df[df['group_id'] == group_id]
     
@@ -161,7 +159,6 @@ def notify_group_match(df, group_id):
         
         for _, peer in grp.iterrows():
             if peer['id'] != current_user['id']:
-                # Clean phone number for WhatsApp link (remove spaces, +, and dashes)
                 clean_phone = re.sub(r'\D', '', str(peer['phone']))
                 wa_link = f"https://wa.me/{clean_phone}"
                 
@@ -326,7 +323,6 @@ def register():
     df = pd.concat([df, pd.DataFrame([new_user])], ignore_index=True)
     upload_csv(df)
     
-    # NEW FORMATTED WAITING EMAIL
     wait_body = f"""
     <h2 style="color: #091F40; margin-top: 0;">You're in Queue! ⏳</h2>
     Hi <strong>{data['name']}</strong>,<br/><br/>
@@ -447,7 +443,7 @@ def match():
 
     if updated:
         upload_csv(df)
-        notify_group_match(df, gid) # Send new dynamic emails!
+        notify_group_match(df, gid)
         return jsonify({'matched': True, 'group_id': gid})
     
     upload_csv(df)
@@ -459,7 +455,7 @@ def match():
 def leave_group(user_id=None):
     data = request.get_json() or {}
     target_id = user_id or data.get('user_id')
-    delete_profile = data.get('delete_profile', False) # NEW: Check if they want to be deleted
+    delete_profile = data.get('delete_profile', False)
     
     df = download_csv()
     user_rows = df[df['id'] == target_id]
@@ -468,12 +464,10 @@ def leave_group(user_id=None):
     idx = user_rows.index[0]
     old_group_id = df.at[idx, 'group_id'] 
     
-    # 1. Unpair the user
     df.at[idx, 'matched'] = False
     df.at[idx, 'group_id'] = ''
     df.at[idx, 'unpair_reason'] = data.get('reason', 'User Requested')
     
-    # 2. Ghost Group Logic (Put the remaining partner back in queue)
     if old_group_id:
         remaining_members = df[df['group_id'] == old_group_id]
         if len(remaining_members) == 1:
@@ -481,7 +475,6 @@ def leave_group(user_id=None):
             df.at[rem_idx, 'matched'] = False
             df.at[rem_idx, 'group_id'] = ''
             
-    # 3. NEW: If they chose "Completely delete me", drop their row entirely
     if delete_profile:
         df = df.drop(index=idx)
         
@@ -556,7 +549,7 @@ def random_pair():
     df.loc[idx_list, 'matched_timestamp'] = iso
     upload_csv(df)
     
-    notify_group_match(df, gid) # Send new dynamic emails
+    notify_group_match(df, gid)
         
     return jsonify({"success": True, "message": "Matched!"})
 
@@ -582,7 +575,7 @@ def manual_pair():
     df.loc[rows.index, 'matched_timestamp'] = iso
     upload_csv(df)
     
-    notify_group_match(df, gid) # Send new dynamic emails
+    notify_group_match(df, gid)
         
     return jsonify({"success": True, "message": "Paired!"})
 
@@ -613,6 +606,7 @@ def submit_peer_session_feedback():
         'id': str(uuid.uuid4()),
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'email': data.get('email', ''),
+        'peer_email': data.get('peer_email', ''),
         'program': data.get('program', ''),
         'session_happened': data.get('session_happened', ''),
         'no_session_reason': data.get('no_session_reason', ''),
@@ -649,6 +643,56 @@ def dl_session_feedback():
         return jsonify({"error": "Unauthorized"}), 401
     return Response(download_csv(SESSION_FEEDBACK_OBJECT_KEY).to_csv(index=False), mimetype='text/csv')
 
+# --- LEADERBOARD ROUTE ---
+@app.route('/api/leaderboard', methods=['GET'])
+@api_wrapper
+def get_leaderboard():
+    df_feedback = download_csv(SESSION_FEEDBACK_OBJECT_KEY)
+    if df_feedback.empty or 'peer_email' not in df_feedback.columns:
+        return jsonify({"success": True, "leaderboard": []})
+        
+    df_users = download_csv(CSV_OBJECT_KEY)
+    
+    df_feedback['peer_email'] = df_feedback['peer_email'].astype(str).str.strip().str.lower()
+    df_feedback['peer_rating'] = pd.to_numeric(df_feedback['peer_rating'], errors='coerce').fillna(0)
+    df_feedback['session_rating'] = pd.to_numeric(df_feedback['session_rating'], errors='coerce').fillna(0)
+    
+    valid_feedback = df_feedback[(df_feedback['peer_email'] != '') & (df_feedback['role'] == 'HelpSeeker')].copy()
+    
+    def calculate_points(row):
+        score = row['peer_rating'] + row['session_rating']
+        if str(row.get('h_respected')).strip().lower() == 'yes':
+            score += 5
+        clarified = str(row.get('h_clarified')).strip().lower()
+        if clarified == 'yes':
+            score += 5
+        elif clarified == 'partially':
+            score += 2
+        if str(row.get('h_outcome')).strip().lower() == 'submit the deliverable':
+            score += 5
+        return score
+
+    if not valid_feedback.empty:
+        valid_feedback['points'] = valid_feedback.apply(calculate_points, axis=1)
+        leaders = valid_feedback.groupby('peer_email')['points'].sum().reset_index()
+        leaders = leaders.sort_values(by='points', ascending=False).head(10)
+    else:
+        return jsonify({"success": True, "leaderboard": []})
+    
+    leaderboard = []
+    for _, row in leaders.iterrows():
+        p_email = row['peer_email']
+        score = int(row['points'])
+        
+        user_match = df_users[df_users['email'].str.lower() == p_email]
+        if not user_match.empty:
+            name = user_match.iloc[0]['name']
+        else:
+            name = p_email.split('@')[0] 
+            
+        leaderboard.append({"name": name, "score": score})
+        
+    return jsonify({"success": True, "leaderboard": leaderboard})
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
-
