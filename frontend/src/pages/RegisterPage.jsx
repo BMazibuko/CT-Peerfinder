@@ -61,7 +61,7 @@ const RegisterPage = () => {
         setFormData(prev => ({
             ...prev,
             topic_module: "All Modules",
-            learning_preferences: "Dedicated Accountability Partner",
+            learning_preferences: "Dedicated Accountability Partner", 
             preferred_study_setup: "2"
         }));
     }
@@ -84,7 +84,12 @@ const RegisterPage = () => {
   };
 
   const getModules = () => {
-    if (isGraphicDesignC11) return ["All Modules"];
+    if (isGraphicDesignC11) return["Module 1 - Week 1 of Project 1","Module 2  - Week 2 of Project 1","Module 3 - Week 3 of Project 1",
+                                  "Module 4 - Week 4 of Project 1","Module 5 - Week 1 of Project 2","Module 6 - Week 2 of Project 2",
+                                  "Module 7 - Week 3 of Project 2","Module 8 - Week 1 of Project 3","Module 9 - Week 2 of Project 3",
+                                  "Module 10 - Week 3 of Project 3","Module 11 - Week 1 of Project 4","Module 12 - Week 2 of Project 4",
+                                  "Module 13 - Week 3 of Project 4","Module 14 - Week 4 of Project 4","Module 15 - Week 1 of Final Project",
+                                  "Module 16 - Week 2 of final Project"];
     if (program === 'CC') return [
       "Week 1 Challenge", "Week 2 Challenge", "Week 3 Challenge", "Week 4 Challenge",
       "Week 5 Challenge", "Week 6 Challenge", "Week 7 Challenge", "Week 8 Challenge",
@@ -267,3 +272,4 @@ const styles = {
 };
 
 export default RegisterPage;
+
