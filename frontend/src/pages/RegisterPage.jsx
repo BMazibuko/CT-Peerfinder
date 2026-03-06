@@ -192,7 +192,13 @@ const RegisterPage = () => {
                 <label style={styles.label}>Learning Preference</label>
                 <select style={styles.select} name="learning_preferences" onChange={handleChange} required value={formData.learning_preferences}>
                 {isGraphicDesignC11 ? (
-                    <option value="Dedicated Accountability Partner">Dedicated Accountability Partner</option>
+                    <>
+                        <option value="">--Select--</option>
+                        <option value="Deep dive">Deep dive</option>
+                        <option value="Co-work sessions">Co-work sessions</option>
+                        <option value="General program navigation">General program navigation</option>
+                        <option value="Coffee Chat">Coffee chat</option>
+                    </> 
                 ) : (
                     <>
                         <option value="">--Select--</option>
@@ -272,4 +278,5 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
