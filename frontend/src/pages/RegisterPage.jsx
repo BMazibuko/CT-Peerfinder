@@ -84,7 +84,7 @@ const RegisterPage = () => {
   };
 
   const getModules = () => {
-    if (isGraphicDesignC11) return["Module 1 - Week 1 of Project 1","Module 2  - Week 2 of Project 1","Module 3 - Week 3 of Project 1",
+    if (isGraphicDesignC11) return["--Select--","Module 1 - Week 1 of Project 1","Module 2  - Week 2 of Project 1","Module 3 - Week 3 of Project 1",
                                   "Module 4 - Week 4 of Project 1","Module 5 - Week 1 of Project 2","Module 6 - Week 2 of Project 2",
                                   "Module 7 - Week 3 of Project 2","Module 8 - Week 1 of Project 3","Module 9 - Week 2 of Project 3",
                                   "Module 10 - Week 3 of Project 3","Module 11 - Week 1 of Project 4","Module 12 - Week 2 of Project 4",
@@ -278,5 +278,6 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
 
