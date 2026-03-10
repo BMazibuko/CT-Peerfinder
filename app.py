@@ -48,7 +48,7 @@ FEEDBACK_OBJECT_KEY = 'ct-peerfinder-feedback.csv'
 SESSION_FEEDBACK_OBJECT_KEY = 'ct_peer_session_feedback.csv'
 
 # FALLBACK ADDED: If they forget the Render Env Var, 'admin123' will always work!
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') 
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123') 
 
 # === PROGRAM CREDENTIALS ===
 def load_google_token(env_var_name):
@@ -248,11 +248,18 @@ def upload_csv(df, key=CSV_OBJECT_KEY):
     df.to_csv(csv_buffer, index=False)
     s3.put_object(Bucket=AWS_S3_BUCKET, Key=key, Body=csv_buffer.getvalue(), ContentType='text/csv')
 
-# BULLETPROOFED AVAILABILITY MATCHING
+# =======================================================
+# BULLETPROOF STRING NORMALIZER
+# =======================================================
+def normalize_str(val):
+    if pd.isna(val) or val is None: return ""
+    # This finds any double/triple spaces and forces them into a single space, then lowercases it
+    return re.sub(r'\s+', ' ', str(val)).strip().lower()
+
 def availability_match(a1, a2):
-    if not a1 or not a2 or a1 == 'nan' or a2 == 'nan': return False
-    a1_clean = str(a1).strip().lower()
-    a2_clean = str(a2).strip().lower()
+    a1_clean = normalize_str(a1)
+    a2_clean = normalize_str(a2)
+    if not a1_clean or not a2_clean: return False
     return (a1_clean == 'flexible' or a2_clean == 'flexible' or a1_clean == a2_clean)
 
 # === ROUTES ===
@@ -260,7 +267,7 @@ def availability_match(a1, a2):
 @app.route('/', methods=['GET'])
 @api_wrapper
 def health():
-    return jsonify({"status": "active", "version": "6.0-Validated-GDCC"})
+    return jsonify({"status": "active", "version": "6.1-Validated-GDCC"})
 
 @app.route('/api/register', methods=['POST'])
 @api_wrapper
@@ -379,21 +386,22 @@ def match():
     gid = f"group-{uuid.uuid4()}"
     iso = datetime.now(timezone.utc).isoformat()
     
-    # EXTREME BULLETPROOFING: Strip all spaces and lowercase everything for perfect matching
+    u_program = normalize_str(user['program'])
+    u_cohort = normalize_str(user['cohort'])
+    u_country = normalize_str(user['country'])
+    u_module = normalize_str(user['topic_module'])
+    u_avail = normalize_str(user['availability'])
+
+    # EXTREME BULLETPROOFING: Apply the normalizer to the database columns too!
     program_pool = df[
         (df['matched'] == False) & 
-        (df['program'].astype(str).str.strip().str.upper() == str(user['program']).strip().upper()) & 
+        (df['program'].apply(normalize_str) == u_program) & 
         (df['id'] != user_id)
     ]
 
-    u_cohort = str(user['cohort']).strip().lower()
-    u_country = str(user['country']).strip().lower()
-    u_module = str(user['topic_module']).strip().lower()
-    u_avail = str(user['availability']).strip().lower()
-
     if user['connection_type'] == 'find':
         # Remove floating points from string conversions (e.g. '2.0' becomes '2')
-        size = str(user['preferred_study_setup']).replace('.0', '').strip() if user['preferred_study_setup'] else '2'
+        size = str(user['preferred_study_setup']).replace('.0', '').strip() if pd.notna(user['preferred_study_setup']) and user['preferred_study_setup'] else '2'
         
         base_pool = program_pool[
             (program_pool['connection_type'] == 'find') &
@@ -402,14 +410,14 @@ def match():
 
         if str(user.get('open_to_global_pairing', '')).strip().upper() == 'YES':
             pool = base_pool[
-                (base_pool['cohort'].astype(str).str.strip().str.lower() == u_cohort) &
-                ((base_pool['country'].astype(str).str.strip().str.lower() == u_country) | (base_pool['open_to_global_pairing'].astype(str).str.strip().str.upper() == 'YES'))
+                (base_pool['cohort'].apply(normalize_str) == u_cohort) &
+                ((base_pool['country'].apply(normalize_str) == u_country) | (base_pool['open_to_global_pairing'].astype(str).str.strip().str.upper() == 'YES'))
             ].copy()
         else:
             pool = base_pool[
-                (base_pool['cohort'].astype(str).str.strip().str.lower() == u_cohort) &
-                (base_pool['country'].astype(str).str.strip().str.lower() == u_country) &
-                (base_pool['topic_module'].astype(str).str.strip().str.lower() == u_module) & 
+                (base_pool['cohort'].apply(normalize_str) == u_cohort) &
+                (base_pool['country'].apply(normalize_str) == u_country) &
+                (base_pool['topic_module'].apply(normalize_str) == u_module) & 
                 (base_pool['availability'].apply(lambda x: availability_match(str(x), u_avail)))
             ].copy()
         
@@ -427,14 +435,14 @@ def match():
         
         if str(user.get('open_to_global_pairing', '')).strip().upper() == 'YES':
             pool = base_pool[
-                (base_pool['cohort'].astype(str).str.strip().str.lower() == u_cohort) &
-                ((base_pool['country'].astype(str).str.strip().str.lower() == u_country) | (base_pool['open_to_global_pairing'].astype(str).str.strip().str.upper() == 'YES'))
+                (base_pool['cohort'].apply(normalize_str) == u_cohort) &
+                ((base_pool['country'].apply(normalize_str) == u_country) | (base_pool['open_to_global_pairing'].astype(str).str.strip().str.upper() == 'YES'))
             ].copy()
         else:
             pool = base_pool[
-                (base_pool['cohort'].astype(str).str.strip().str.lower() == u_cohort) &
-                (base_pool['country'].astype(str).str.strip().str.lower() == u_country) &
-                (base_pool['topic_module'].astype(str).str.strip().str.lower() == u_module) &
+                (base_pool['cohort'].apply(normalize_str) == u_cohort) &
+                (base_pool['country'].apply(normalize_str) == u_country) &
+                (base_pool['topic_module'].apply(normalize_str) == u_module) &
                 (base_pool['availability'].apply(lambda x: availability_match(str(x), u_avail)))
             ].copy()
         
@@ -698,4 +706,3 @@ def get_leaderboard():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
-
