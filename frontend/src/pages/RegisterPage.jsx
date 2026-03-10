@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -56,17 +56,6 @@ const RegisterPage = () => {
     kind_of_support: '', disclaimer_agree: false
   });
 
-  useEffect(() => {
-    if (isGraphicDesignC11) {
-        setFormData(prev => ({
-            ...prev,
-            topic_module: "All Modules",
-            learning_preferences: "Dedicated Accountability Partner", 
-            preferred_study_setup: "2"
-        }));
-    }
-  }, [isGraphicDesignC11]);
-
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     const name = e.target.name;
@@ -84,12 +73,24 @@ const RegisterPage = () => {
   };
 
   const getModules = () => {
-    if (isGraphicDesignC11) return["--Select--","Module 1 - Week 1 of Project 1","Module 2  - Week 2 of Project 1","Module 3 - Week 3 of Project 1",
-                                  "Module 4 - Week 4 of Project 1","Module 5 - Week 1 of Project 2","Module 6 - Week 2 of Project 2",
-                                  "Module 7 - Week 3 of Project 2","Module 8 - Week 1 of Project 3","Module 9 - Week 2 of Project 3",
-                                  "Module 10 - Week 3 of Project 3","Module 11 - Week 1 of Project 4","Module 12 - Week 2 of Project 4",
-                                  "Module 13 - Week 3 of Project 4","Module 14 - Week 4 of Project 4","Module 15 - Week 1 of Final Project",
-                                  "Module 16 - Week 2 of final Project"];
+    if (isGraphicDesignC11) return [
+      "Module 1 - Week 1 of Project 1",
+      "Module 2 - Week 2 of Project 1",
+      "Module 3 - Week 3 of Project 1",
+      "Module 4 - Week 4 of Project 1",
+      "Module 5 - Week 1 of Project 2",
+      "Module 6 - Week 2 of Project 2",
+      "Module 7 - Week 3 of Project 2",
+      "Module 8 - Week 1 of Project 3",
+      "Module 9 - Week 2 of Project 3",
+      "Module 10 - Week 3 of Project 3",
+      "Module 11 - Week 1 of Project 4",
+      "Module 12 - Week 2 of Project 4",
+      "Module 13 - Week 3 of Project 4",
+      "Module 14 - Week 4 of Project 4",
+      "Module 15 - Week 1 of Final Project",
+      "Module 16 - Week 2 of Final Project"
+    ];
     if (program === 'CC') return [
       "Week 1 Challenge", "Week 2 Challenge", "Week 3 Challenge", "Week 4 Challenge",
       "Week 5 Challenge", "Week 6 Challenge", "Week 7 Challenge", "Week 8 Challenge",
@@ -184,30 +185,18 @@ const RegisterPage = () => {
              <div style={styles.half}>
                 <label style={styles.label}>Current Week/Module</label>
                 <select style={styles.select} name="topic_module" onChange={handleChange} required value={formData.topic_module}>
-                    {!isGraphicDesignC11 && <option value="">--Select--</option>}
+                    <option value="">--Select--</option>
                     {getModules().map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
              </div>
              <div style={styles.half}>
                 <label style={styles.label}>Learning Preference</label>
                 <select style={styles.select} name="learning_preferences" onChange={handleChange} required value={formData.learning_preferences}>
-                {isGraphicDesignC11 ? (
-                    <>
-                        <option value="">--Select--</option>
-                        <option value="Deep dive">Deep dive</option>
-                        <option value="Co-work sessions">Co-work sessions</option>
-                        <option value="General program navigation">General program navigation</option>
-                        <option value="Coffee Chat">Coffee chat</option>
-                    </> 
-                ) : (
-                    <>
-                        <option value="">--Select--</option>
-                        <option value="Deep dive">Deep dive</option>
-                        <option value="Co-work sessions">Co-work sessions</option>
-                        <option value="General program navigation">General program navigation</option>
-                        <option value="Coffee Chat">Coffee chat</option>
-                    </>
-                )}
+                    <option value="">--Select--</option>
+                    <option value="Deep dive">Deep dive</option>
+                    <option value="Co-work sessions">Co-work sessions</option>
+                    <option value="General program navigation">General program navigation</option>
+                    <option value="Coffee Chat">Coffee chat</option>
                 </select>
              </div>
            </div>
@@ -278,6 +267,3 @@ const styles = {
 };
 
 export default RegisterPage;
-
-
-
