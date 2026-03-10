@@ -48,7 +48,7 @@ FEEDBACK_OBJECT_KEY = 'ct-peerfinder-feedback.csv'
 SESSION_FEEDBACK_OBJECT_KEY = 'ct_peer_session_feedback.csv'
 
 # FALLBACK ADDED: If they forget the Render Env Var, 'admin123' will always work!
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123') 
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') 
 
 # === PROGRAM CREDENTIALS ===
 def load_google_token(env_var_name):
@@ -698,3 +698,4 @@ def get_leaderboard():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
+
