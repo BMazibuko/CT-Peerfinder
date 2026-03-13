@@ -215,8 +215,10 @@ const RegisterPage = () => {
              <div>
                 <label style={styles.label}>Preferred Group Size</label>
                 {isGraphicDesignC11 ? (
-                    <select style={styles.select} name="preferred_study_setup" value="2" disabled={true}>
-                        <option value="2">Pair (2 People)</option>
+                    <select style={styles.select} name="preferred_study_setup" onChange={handleChange} required>
+                        <option value="">--Select--</option>
+                        <option value="2">Pair (2 people)</option>
+                        <option value="3">Group of 3</option>
                     </select>
                 ) : (
                     <select style={styles.select} name="preferred_study_setup" onChange={handleChange} required>
@@ -269,6 +271,7 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
 
 
