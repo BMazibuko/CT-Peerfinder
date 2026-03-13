@@ -106,9 +106,8 @@ const PeerFeedbackPage = () => {
             <label style={styles.label}>Your Program *</label>
             <select style={styles.select} name="program" value={formData.program} onChange={handleChange} required>
               <option value="">--Select Program--</option>
-              <option value="VA">Virtual Assistant</option>
-              <option value="AiCE">AI Career Essentials</option>
-              <option value="PF">Professional Foundations</option>
+              <option value="GD">Graphic Design</option>
+              <option value="CC">Content Creation</option>
             </select>
           </div>
 
