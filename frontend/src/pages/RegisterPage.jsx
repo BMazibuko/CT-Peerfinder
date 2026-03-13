@@ -211,24 +211,17 @@ const RegisterPage = () => {
              <p style={{fontSize:'0.8rem', color:'#666', marginTop:'5px', marginBottom:'15px'}}>*Select 'Yes' to relax constraints and find a match faster.</p>
            </div>
 
-           {connectionType === 'find' && (
-             <div>
+          {connectionType === 'find' && (
+              <div>
                 <label style={styles.label}>Preferred Group Size</label>
-                {isGraphicDesignC11 ? (
-                    <select style={styles.select} name="preferred_study_setup" onChange={handleChange} required>
-                        <option value="">--Select--</option>
-                        <option value="2">Pair (2 people)</option>
-                        <option value="3">Group of 3</option>
-                    </select>
-                ) : (
-                    <select style={styles.select} name="preferred_study_setup" onChange={handleChange} required>
-                        <option value="">--Select--</option>
-                        <option value="2">Pair (2 people)</option>
-                        <option value="3">Group of 3</option>
-                    </select>
-                )}
-             </div>
-           )}
+                <select style={styles.select} name="preferred_study_setup" onChange={handleChange} required>
+                  <option value="">--Select--</option>
+                  <option value="2">Pair (2 people)</option>
+                  <option value="3">Group of 3</option>
+                </select>
+              </div>
+            )}
+          
            
            {connectionType !== 'find' && (
              <div><label style={styles.label}>Support Type</label><select style={styles.select} name="kind_of_support" onChange={handleChange} required><option value="">--Select--</option><option value="Content Explanation">Content Explanation</option><option value="Test or Milestone clarification">Test or Milestone clarification</option><option value="Full support">Full support</option></select></div>
@@ -271,6 +264,7 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
 
 
