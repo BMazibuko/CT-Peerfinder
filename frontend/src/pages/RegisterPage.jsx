@@ -50,9 +50,9 @@ const RegisterPage = () => {
 
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', country: '', timezone: '', language: '',
-    open_to_global_pairing: 'No', 
+    open_to_global_pairing: '', 
     topic_module: '', 
-    learning_preferences: '', availability: '', preferred_study_setup: '2', 
+    learning_preferences: '', availability: '', preferred_study_setup: '', 
     kind_of_support: '', disclaimer_agree: false
   });
 
@@ -269,4 +269,5 @@ const styles = {
 };
 
 export default RegisterPage;
+
 
