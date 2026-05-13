@@ -18,7 +18,7 @@ const VERTICALS = {
   },
   CREATIVE: {
     name: 'CREATIVE TECH',
-    url: 'https://cts-peerfinder.vercel.app',
+    url: 'https://ct-peerfinder.vercel.app',
     programs: [
       { id: 'CC', name: 'Content Creation', courses: ['CC-1: Content Identity & Concept Development', 'CC-2: Content Creation Workflow', 'CC-3: AI-Enhanced Content Creation', 'CC-4: Animation & Motion Graphics Foundations', 'CC-5: Business Foundations for Content Creators', 'CC-6: Distribution & Monetization'] },
       { id: 'GD', name: 'Graphic Design', courses: ['GD-1: Graphic Design Software Fundamentals', 'GD-2: Foundations of Graphic Design', 'GD-3: Poster Design & Composition', 'GD-4: Typography & Grid Systems', 'GD-5: Editorial & Magazine Design', 'GD-6: Designing for Social Media', 'GD-7: Brand Strategy for Designers', 'GD-8: AI for Graphic Design', 'GD-9: Portfolio Development', 'GD-10: Freelancing & Business Skills'] }
