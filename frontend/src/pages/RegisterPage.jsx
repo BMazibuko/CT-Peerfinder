@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { colors, fonts } from '../theme';
@@ -32,7 +32,6 @@ const countryToTimezone = {
   "Togo": "UTC", "Tunisia": "UTC+1", "Uganda": "UTC+3", "Zambia": "UTC+2", "Zimbabwe": "UTC+2"
 };
 
-// --- HELPER: GENERATE UTC OFFSETS FOR NON-AFRICAN (-12 to +14) ---
 const utcOffsets = Array.from({ length: 27 }, (_, i) => {
   const offset = i - 12;
   return offset >= 0 ? `+${offset}` : `${offset}`;
@@ -43,39 +42,39 @@ const PORTAL_URL = 'https://alx-peerfinder.vercel.app';
 const RegisterPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   
-  // Extract state passed from LandingPage or VolunteerMarketplace
-  const program = location.state?.program || 'GD'; // Defaulted to Graphic Design for CT context
-  const course = location.state?.course || 'Unknown Course';
-  const connectionType = location.state?.connectionType || 'find';
-  const targetVolunteerId = location.state?.targetVolunteerId || null;
+  // FIX: Extract state from URL Query Params FIRST, then fallback to location.state
+  const program = searchParams.get('program') || location.state?.program;
+  const course = searchParams.get('course') || location.state?.course;
+  const connectionType = searchParams.get('connectionType') || location.state?.connectionType;
+  const targetVolunteerId = searchParams.get('targetVolunteerId') || location.state?.targetVolunteerId || null;
 
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', country: '', timezone: '', language: '',
     match_preference: '', 
     learning_preferences: '', availability: '', meeting_preference: 'All', 
-    group_size: '2', // Defaults to 2 for Study Buddy, will change for 'group'
+    group_size: '2', 
     volunteer_capacity: '', 
-    pseudonym: '', // NEW: Replaces gender for 'offer'
+    pseudonym: '', 
     disclaimer_agree: false
   });
 
-  // Redirect to the unified landing page if accessed directly without program/course state
+  // FIX: Check the derived variables, not just location.state
   useEffect(() => {
-    if (!location.state?.program || !location.state?.course || !location.state?.connectionType) {
+    if (!program || !course || !connectionType) {
       window.location.href = PORTAL_URL;
     }
-  }, [location.state]);
+  }, [program, course, connectionType]);
 
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     const name = e.target.name;
 
-    // Auto-fill timezone when country changes
     if (name === 'country') {
         if (value === 'Non-African') {
-            setFormData({ ...formData, country: value, timezone: '' }); // Clear it so they can pick
+            setFormData({ ...formData, country: value, timezone: '' }); 
         } else {
             const tz = countryToTimezone[value] || '';
             setFormData({ ...formData, country: value, timezone: tz });
@@ -101,8 +100,6 @@ const RegisterPage = () => {
       const response = await axios.post(`${API_URL}/api/register`, payload);
       
       if (response.data.success) {
-        // Instantly transport the user to their Status Dashboard!
-        // We pass the email to the URL so the StatusPage knows who to look up.
         navigate(`/status/${encodeURIComponent(formData.email)}`, { 
           state: { isDuplicate: response.data.is_duplicate } 
         });
@@ -111,11 +108,8 @@ const RegisterPage = () => {
         alert("Error: " + (error.response?.data?.error || error.message)); 
         setLoading(false);
     } 
-    // Notice we removed setLoading(false) from a finally block so the spinner 
-    // keeps spinning while the page transitions, making it feel smoother!
   };
 
-  // Dynamic titles based on connection type
   const titles = {
     'find': 'Find a Study Buddy 🤝',
     'group': 'Form a Group Squad 👥',
@@ -123,19 +117,19 @@ const RegisterPage = () => {
     'need': targetVolunteerId ? 'Instant Support Pairing ⚡' : 'Request Priority Support 🆘'
   };
 
+  // Safe fallback if the page is redirecting to avoid rendering errors
+  if (!program || !course || !connectionType) return null; 
+
   return (
     <div style={styles.container}>
-      {/* Explicitly directing the back button to the unified CA portal */}
       <button style={styles.backBtn} onClick={() => window.location.href = PORTAL_URL}>&larr; Back to Portal</button>
-      
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={styles.card}>
         <h2 style={styles.header}>Register for {program}</h2>
         <p style={{textAlign:'center', marginBottom:'15px', color: '#666'}}>
           Short Course: <strong>{course}</strong><br/>
-          Goal: <strong>{titles[connectionType].split(' ')[0]} {titles[connectionType].split(' ')[1]} {titles[connectionType].split(' ')[2]}</strong>
+          Goal: <strong>{titles[connectionType]?.split(' ')[0]} {titles[connectionType]?.split(' ')[1]} {titles[connectionType]?.split(' ')[2]}</strong>
         </p>
 
-        {/* --- WARNING BOX --- */}
         <div style={styles.warningBox}>
           <h3 style={styles.warningTitle}>⚠️ Please Read Carefully</h3>
           <ul style={styles.warningList}>
@@ -153,7 +147,6 @@ const RegisterPage = () => {
              <div style={styles.half}><label style={styles.label}>Email Address(ALX registered) *</label><input style={styles.input} name="email" type="email" onChange={handleChange} required /></div>
            </div>
            
-           {/* MODIFIED: Pseudonym Field replaces Gender ONLY for Volunteers offering support */}
            {connectionType === 'offer' && (
                <div style={{marginBottom: '15px'}}>
                  <label style={styles.label}>Support Group Pseudonym *</label>
@@ -185,7 +178,6 @@ const RegisterPage = () => {
               </div>
               <div style={styles.half}>
                   <label style={styles.label}>Time Zone *</label>
-                  {/* SMART TIMEZONE INPUT */}
                   {formData.country === 'Non-African' ? (
                       <div style={styles.tzWrapper}>
                           <span style={{ fontWeight: 'bold', color: '#555' }}>UTC</span>
@@ -245,10 +237,7 @@ const RegisterPage = () => {
                 </select>
              </div>
            </div>
-
-           {/* --- CONDITIONAL RENDER: MATCHING PREFERENCE & CAPACITIES --- */}
            
-           {/* Skip Matching Preference if targeting a specific volunteer! */}
            {!targetVolunteerId && (
                <div>
                   <label style={styles.label}>Matching Priority (How should we pair you?) *</label>
@@ -262,7 +251,6 @@ const RegisterPage = () => {
                </div>
            )}
 
-           {/* Group Size - ONLY for Group Squad */}
            {connectionType === 'group' && (
              <div>
                 <label style={styles.label}>Preferred Group Size *</label>
@@ -274,7 +262,6 @@ const RegisterPage = () => {
              </div>
            )}
 
-           {/* Volunteer Capacity - ONLY for Offering Support */}
            {connectionType === 'offer' && (
               <div style={{background: '#f0fdf4', padding: '15px', borderRadius: '8px', border: `1px solid ${colors.primary.springGreen}`}}>
                 <label style={{...styles.label, color: '#085041'}}>Volunteer Capacity (How many peers can you support?) *</label>
