@@ -79,7 +79,7 @@ def validate_registration(data):
         errors.append("Invalid email address format")
     if not re.match(r'^\+?[1-9]\d{1,14}$', data.get('phone', '').replace(' ', '')):
         errors.append("Invalid phone number")
-    if data.get('program') not in ['CC', 'GD']:
+    if data.get('program') not in ['CC', 'GD', 'VA', 'AiCE', 'PF', 'Graphic Design', 'Content Creation']:
         errors.append("Invalid program selected. Please choose Content Creation (CC) or Graphic Design (GD).")
     if data.get('connection_type') not in ['find', 'offer', 'need', 'group']:
         errors.append("Invalid connection type")
