@@ -417,11 +417,18 @@ def register():
 @app.route('/api/marketplace', methods=['GET'])
 @api_wrapper
 def get_marketplace():
-    program = request.args.get('program')
-    course = request.args.get('course')
+    program = request.args.get('program', '').strip()
+    course = request.args.get('course', '').strip()
     if not program or not course: return jsonify({"success": False, "error": "Program and course required"}), 400
+    
     df = download_csv()
-    vols = df[(df['connection_type'] == 'offer') & (df['program'] == program) & (df['course'] == course)]
+    # Fixed strict case/space match mismatch below:
+    vols = df[
+        (df['connection_type'] == 'offer') & 
+        (df['program'].str.strip().str.upper() == program.upper()) & 
+        (df['course'].str.strip().str.lower() == course.lower())
+    ]
+    
     volunteers = []
     for _, vol in vols.iterrows():
         volunteers.append({
@@ -434,6 +441,15 @@ def get_marketplace():
             'current_load': vol.get('current_load', 0)
         })
     return jsonify({"success": True, "volunteers": volunteers})
+
+# Added to support dashboards hitting POST /api/check-status
+@app.route('/api/check-status', methods=['POST'])
+@api_wrapper
+def check_status_post():
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    if not email: return jsonify({"success": False, "error": "Email required"}), 400
+    return get_status(email)
 
 @app.route('/api/status/<email>', methods=['GET'])
 @api_wrapper
