@@ -6,6 +6,8 @@ import { colors, fonts } from '../theme';
 import Spinner from '../components/Spinner';
 import { API_URL } from '../config';
 
+const PORTAL_URL = 'https://alx-peerfinder.vercel.app';
+
 const StatusPage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -29,9 +31,11 @@ const StatusPage = () => {
 
   const fetchStatus = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/status/${encodeURIComponent(userId)}`);
+      // Decode handles the %40 replacing the @ symbol in URLs perfectly
+      const res = await axios.get(`${API_URL}/api/status/${encodeURIComponent(userId.trim())}`);
       if (Array.isArray(res.data) && res.data.length > 0) {
         setRequests(res.data);
+        setError(null);
       } else {
         setError("No active requests found.");
       }
@@ -42,7 +46,9 @@ const StatusPage = () => {
     }
   };
 
-  useEffect(() => { fetchStatus(); }, [userId]);
+  useEffect(() => { 
+    if (userId) fetchStatus(); 
+  }, [userId]);
 
   const submitUnpair = async () => {
     if (!unpairReason) {
@@ -65,7 +71,7 @@ const StatusPage = () => {
       await axios.post(`${API_URL}/api/leave-group`, { 
           user_id: unpairModal.reqId, 
           reason: finalReason,
-          ghoster_email: unpairReason === "Ghosting / Partner didn't show up" ? ghosterEmail : null,
+          ghoster_email: unpairReason === "Ghosting / Partner didn't show up" ? ghosterEmail.trim().toLowerCase() : null,
           delete_profile: unpairAction === 'delete' 
       });
       
@@ -75,7 +81,7 @@ const StatusPage = () => {
       setGhosterEmail("");
       
       if (unpairAction === 'delete') {
-         setFeedbackModal({ isOpen: true, title: 'Request Deleted', message: 'You have been unpaired and your request has been removed.', type: 'success', redirect: '/' });
+         setFeedbackModal({ isOpen: true, title: 'Request Deleted', message: 'You have been unpaired and your request has been removed.', type: 'success', redirect: PORTAL_URL });
       } else {
          setFeedbackModal({ isOpen: true, title: 'Unpaired Successfully', message: 'You have been unpaired and placed back in the matching queue.', type: 'success', redirect: null });
          await fetchStatus(); 
@@ -90,7 +96,7 @@ const StatusPage = () => {
   const closeFeedbackModal = () => {
     const redirect = feedbackModal.redirect;
     setFeedbackModal({ ...feedbackModal, isOpen: false });
-    if (redirect) navigate(redirect);
+    if (redirect) window.location.href = redirect;
   };
 
   if (error) return <div style={styles.error}>{error}</div>;
@@ -185,7 +191,7 @@ const StatusPage = () => {
 
                   <h3 style={{ color: colors.primary.berkeleyBlue, fontSize: '1.1rem' }}>Your Group Members:</h3>
                   
-                  {req.group.map((peer, peerIdx) => (
+                  {req.group && req.group.map((peer, peerIdx) => (
                     <div key={peerIdx} style={{ background: 'white', padding: '15px', borderRadius: '10px', marginBottom: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: `5px solid ${colors.secondary.electricBlue}` }}>
                       <p style={{ margin: '0 0 5px 0', fontWeight: 'bold', fontSize: '1rem' }}>{peer.name}</p>
                       <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '0.85rem' }}>📧 {peer.email}</p>
@@ -202,7 +208,7 @@ const StatusPage = () => {
 
                   <div style={{ marginTop: '20px', background: '#e3f2fd', padding: '15px', borderRadius: '10px', textAlign: 'center', border: '1px solid #b8daff' }}>
                       <h4 style={{ color: '#0056b3', margin: '0 0 5px 0', fontSize: '1rem' }}>🎥 Video Room</h4>
-                      <a href={`https://meet.jit.si/ALX-PeerFinder-${req.real_id || req.group[0]?.name.replace(/\s/g,'')}`} target="_blank" rel="noreferrer" style={{ background: '#0056b3', color: 'white', padding: '10px 20px', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'inline-block', marginTop: '5px' }}>Join Meeting</a>
+                      <a href={`https://meet.jit.si/ALX-CT-PeerFinder-${req.real_id || (req.group && req.group[0]?.name.replace(/\s/g,''))}`} target="_blank" rel="noreferrer" style={{ background: '#0056b3', color: 'white', padding: '10px 20px', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'inline-block', marginTop: '5px' }}>Join Meeting</a>
                   </div>
 
                   <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -224,7 +230,7 @@ const StatusPage = () => {
 
           {queuedRequests.map((req, idx) => (
             <motion.div key={req.real_id || `queue-${idx}`} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: idx * 0.1 }} style={styles.card}>
-              <div style={{...styles.header, background: colors.secondary.electricBlue}}>
+              <div style={{...styles.header, background: colors.secondary.electricBlue, borderBottom: 'none'}}>
                   <p style={{ margin: '0', fontSize: '1.1rem', fontWeight: 'bold' }}>{req.user.program}</p>
                   <p style={{ margin: '5px 0 0 0', opacity: 0.9 }}>{req.user.course}</p>
               </div>
@@ -233,7 +239,7 @@ const StatusPage = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div style={styles.pendingBadge}>⏳ WAITING FOR MATCH</div>
                   <p style={{ color: '#555', fontSize: '0.95rem', marginBottom: '20px' }}>
-                    Hang in there! we are working hard to find you the perfect peer. You will receive an email the moment a match is found!
+                    Hang in there! We are working hard to find you the perfect peer. You will receive an email the moment a match is found!
                   </p>
                   
                   <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
@@ -248,7 +254,7 @@ const StatusPage = () => {
       </div>
 
       <div style={{marginTop: '40px'}}>
-         <button onClick={() => navigate('/')} style={styles.homeBtn}>&larr; Return to Home</button>
+         <button onClick={() => window.location.href = PORTAL_URL} style={styles.homeBtn}>&larr; Return to Home</button>
       </div>
 
       {/* --- UNPAIR MODAL --- */}
@@ -334,7 +340,7 @@ const StatusPage = () => {
 
 const styles = {
   container: { minHeight: '100vh', background: colors.primary.berkeleyBlue, padding: '40px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: fonts.main },
-  error: { color: 'red', marginTop: '50px', fontSize: '1.2rem' },
+  error: { color: 'white', background: '#d32f2f', padding: '15px 25px', borderRadius: '8px', marginTop: '50px', fontSize: '1.2rem', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' },
   
   dashboardHeader: { textAlign: 'center', color: 'white', marginBottom: '40px' },
   dashboardTitle: { fontSize: '2.5rem', margin: '0 0 10px 0', fontWeight: 'bold' },
